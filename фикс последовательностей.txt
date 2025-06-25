@@ -1,0 +1,24 @@
+DO $$
+DECLARE
+    rec RECORD;
+BEGIN
+    /* Находим все последовательности, привязанные к serial-колонкам */
+    FOR rec IN
+        SELECT
+            seq.relname AS seq_name,
+            tab.relname AS tbl_name,
+            col.attname AS col_name
+        FROM pg_class       seq
+        JOIN pg_sequence    s   ON s.seqrelid = seq.oid
+        JOIN pg_depend      d   ON d.objid   = seq.oid
+        JOIN pg_class       tab ON d.refobjid = tab.oid
+        JOIN pg_attribute   col ON col.attrelid = tab.oid AND col.attnum = d.refobjsubid
+        WHERE seq.relkind = 'S'
+          AND d.deptype  = 'a'    -- auto dependency
+    LOOP
+        EXECUTE format(
+            'SELECT setval(''%I'', COALESCE((SELECT MAX(%I) FROM %I),0)+1, false);',
+            rec.seq_name, rec.col_name, rec.tbl_name
+        );
+    END LOOP;
+END $$;
