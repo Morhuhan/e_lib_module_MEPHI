@@ -1,7 +1,6 @@
 // src/utils/interfaces.tsx
 // Актуально на 22 июня 2025 г. — синхронизировано со схемой PostgreSQL
 import { z, ZodType } from 'zod';
-import { FieldConfig } from '../components/CRUDmodal.tsx';
 
 /* ─────────────────────────── базовые ─────────────────────────── */
 
@@ -20,10 +19,9 @@ export interface Person {
   patronymic?: string | null;
   sex: string;
   birthDate: string;
-  inn?: number | null;
+  inn?: string | null;
   snils?: string | null;
   email?: string | null;
-  military?: string | null;
 }
 
 export interface PaginatedResponse<T> {
@@ -191,23 +189,6 @@ export const bookSchema = z.object({
   pubName: z.string().optional(),
   pubYear: z.number().int().nullable().optional(),
 });
-
-export const bookFields: FieldConfig[] = [
-  { name: 'title',            label: 'Название *', required: true },
-  { name: 'bookType',         label: 'Тип' },
-  { name: 'edit',             label: 'Редакция' },
-  { name: 'editionStatement', label: 'Сведения об изд.' },
-  { name: 'series',           label: 'Серия' },
-  { name: 'physDesc',         label: 'Характеристики', kind: 'textarea' },
-  { name: 'description',      label: 'Описание',       kind: 'textarea' },
-  { name: 'pubCity', label: 'Город' },
-  { name: 'pubName', label: 'Издатель' },
-  { name: 'pubYear', label: 'Год', kind: 'number', inputProps: { min: 1000, max: 3000, step: 1 } },
-  { name: 'authors',   kind: 'hidden' },
-  { name: 'bbkAbbs',   kind: 'hidden' },
-  { name: 'udcAbbs',   kind: 'hidden' },
-  { name: 'grntiAbbs', kind: 'hidden' },
-];
 
 export type BookFormValues = z.infer<typeof bookSchema>;
 export type FormValues = BookFormValues;

@@ -16,11 +16,16 @@ type RawPerson = Partial<Person> & { id: number; birthday?: string };
 const normalizePerson = (raw: RawPerson): Person => ({
   id: raw.id,
   firstName: raw.firstName?.trim() ?? '',
-  lastName: raw.lastName?.trim() || raw.firstName?.trim() || `Читатель #${raw.id}`,
+  lastName:
+    raw.lastName?.trim() ||
+    raw.firstName?.trim() ||
+    `Читатель #${raw.id}`,
   patronymic: raw.patronymic?.trim() ?? '',
   sex: raw.sex ?? '',
-  // поддерживаем оба возможных названия поля
   birthDate: raw.birthDate ?? raw.birthday ?? '',
+  inn: raw.inn ?? '',
+  snils: raw.snils ?? '',
+  email: raw.email ?? '',
 });
 
 const AddPersonDialog: React.FC<Props> = ({ open, onClose, onPick }) => {

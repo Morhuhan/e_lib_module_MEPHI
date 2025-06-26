@@ -5,12 +5,9 @@ import clsx from 'clsx';
 import type { BookCopy, PaginatedResponse } from '../utils/interfaces.tsx';
 import Pagination from '../components/Pagination.tsx';
 import httpClient from '../utils/httpsClient.tsx';
-<<<<<<< HEAD
-=======
 import CreateCopyModal from '../components/Modals/CreateCopyModal.tsx';
 import EditCopyModal from '../components/Modals/EditCopyModal.tsx';
 import DeleteCopyConfirmModal from '../components/DeleteCopyConfirmModal.tsx';
->>>>>>> temp-branch
 
 const LIMIT_OPTIONS = [10, 20, 50] as const;
 
@@ -261,7 +258,7 @@ const Copies: React.FC = () => {
       />
 
       {/* ─── модалки ─── */}
-      {/* <EditCopyModal
+      <EditCopyModal
         copy={editing}
         onClose={() => setEditing(null)}
         onSaved={onCopySaved}
@@ -275,7 +272,7 @@ const Copies: React.FC = () => {
         open={creating}
         onClose={() => setCreating(false)}
         onCreated={() => { setCreating(false); refresh(); }}
-      /> */}
+      />
     </div>
   );
 };

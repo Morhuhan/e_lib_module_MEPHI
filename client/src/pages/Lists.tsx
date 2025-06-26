@@ -3,20 +3,10 @@ import React, { useState, useEffect, useCallback, ChangeEvent, Fragment } from '
 import clsx from 'clsx';
 import { toast } from 'react-toastify';
 
-import {
-  bookFields,
-  bookSchema,
-  type Book,
-  type PaginatedResponse,
-} from '../utils/interfaces.tsx';
+import { type Book, type PaginatedResponse } from '../utils/interfaces.tsx';
 
 import httpClient from '../utils/httpsClient.tsx';
 
-<<<<<<< HEAD
-import Pagination from '../components/Pagination.tsx';
-import ReferenceManagerModal, { EntityKey } from '../components/ReferenceManagerModal.tsx';
-import CRUDmodal from '../components/CRUDmodal.tsx';
-=======
 import Pagination          from '../components/Pagination.tsx';
 
 import ReferenceManagerModal, {
@@ -25,7 +15,7 @@ import ReferenceManagerModal, {
 import CreateBookModal from '../components/Modals/CreateBookModal.tsx';
 import EditBookModal from '../components/Modals/EditBookModal.tsx';
 import DeleteBookConfirmModal from '../components/DeleteBookConfirmModal.tsx';
->>>>>>> temp-branch
+import PrintBooksSlip from '../utils/print/PrintBooksSlip.tsx';
 
 const LIMIT_OPTIONS = [10, 20, 50] as const;
 
@@ -225,6 +215,14 @@ const Lists: React.FC = () => {
 
         <div className="w-full sm:w-auto sm:ml-auto" />
 
+        {/* кнопка печати */}
+        <PrintBooksSlip
+          search={rawSearch.trim()}
+          searchColumn={searchColumn}
+          onlyAvailable={onlyAvailable}
+          sort={sort}
+        />
+
         <button
           type="button"
           onClick={() => setCreating(true)}
@@ -281,82 +279,6 @@ const Lists: React.FC = () => {
                     {book.title ?? '—'}
                   </td>
 
-<<<<<<< HEAD
-                    {/* ─── авторы ─── */}
-                    <td className="p-2 border">
-                      {(book.authors ?? []).length
-                        ? book.authors!.map((a, idx) => (
-                            <span
-                              key={idx}
-                              onClick={e =>
-                                openReference(e, 'authors', 'lastName', a.lastName)
-                              }
-                              className={clsx(
-                                'cursor-pointer',
-                                ctrlPressed && 'underline text-blue-600',
-                              )}
-                            >
-                              {[
-                                a.firstName,
-                                a.patronymic,
-                                a.lastName,
-                                a.birthYear,
-                              ]
-                                .filter(Boolean)
-                                .join(' ')}
-                              {idx < book.authors!.length - 1 ? '; ' : ''}
-                            </span>
-                          ))
-                        : '—'}
-                    </td>
-
-                    <td className="p-2 border">{book.bookType ?? '—'}</td>
-                    <td className="p-2 border">
-                      {book.edit ?? '—'}
-                      {book.editionStatement ? `, ${book.editionStatement}` : ''}
-                    </td>
-                    <td className="p-2 border">{book.series ?? '—'}</td>
-                    <td className="p-2 border">{book.physDesc ?? '—'}</td>
-                    <td className="p-2 border">{book.description ?? '—'}</td>
-
-                    {/* ─── ББК, УДК, ГРНТИ ─── */}
-                    <td className="p-2 border">
-                      {(book.bbks ?? []).map((x, i) => (
-                        <span
-                          key={i}
-                          onClick={e => openReference(e, 'bbk', 'bbkAbb', x.bbkAbb)}
-                          className={clsx('cursor-pointer', ctrlPressed && 'underline text-blue-600')}
-                        >
-                          {x.bbkAbb}
-                          {i < book.bbks!.length - 1 ? ', ' : ''}
-                        </span>
-                      )) || '—'}
-                    </td>
-                    <td className="p-2 border">
-                      {(book.udcs ?? []).map((x, i) => (
-                        <span
-                          key={i}
-                          onClick={e => openReference(e, 'udc', 'udcAbb', x.udcAbb)}
-                          className={clsx('cursor-pointer', ctrlPressed && 'underline text-blue-600')}
-                        >
-                          {x.udcAbb}
-                          {i < book.udcs!.length - 1 ? ', ' : ''}
-                        </span>
-                      )) || '—'}
-                    </td>
-                    <td className="p-2 border">
-                      {(book.grntis ?? []).map((x, i) => (
-                        <span
-                          key={i}
-                          onClick={e => openReference(e, 'grnti', 'code', x.code)}
-                          className={clsx('cursor-pointer', ctrlPressed && 'underline text-blue-600')}
-                        >
-                          {x.code}
-                          {i < book.grntis!.length - 1 ? ', ' : ''}
-                        </span>
-                      )) || '—'}
-                    </td>
-=======
                   {/* ─── авторы ─── */}
                   <td className="p-2 border">
                     {(book.authors ?? []).length
@@ -474,7 +396,6 @@ const Lists: React.FC = () => {
                         ))
                       : '—'}
                   </td>
->>>>>>> temp-branch
                     <td className="p-2 border">
                       {(book.publicationPlaces ?? []).map((p, i) => (
                         <span key={i}>
@@ -538,11 +459,7 @@ const Lists: React.FC = () => {
                           </thead>
                           <tbody>
                             {(book.bookCopies ?? []).map(copy => {
-<<<<<<< HEAD
-                              const issued = (copy.borrowRecords ?? []).length > 0;
-=======
                               const issued = (copy.borrowRecords ?? []).some(r => !r.returnDate);
->>>>>>> temp-branch
                               const priceNum =
                                 copy.price != null ? Number(copy.price) : null;
                               return (
@@ -598,11 +515,6 @@ const Lists: React.FC = () => {
         }}
       />
 
-<<<<<<< HEAD
-      {/* ---------- модалки ---------- */}
-      {/* Create */}
-      <CRUDmodal
-=======
       {/* ---------- модалки книг ---------- */}
       <EditBookModal
         book={editing}
@@ -615,47 +527,13 @@ const Lists: React.FC = () => {
         onDeleted={onBookDeleted}
       />
       <CreateBookModal
->>>>>>> temp-branch
         open={creating}
         onClose={() => setCreating(false)}
-        title="Новая книга"
-        endpoint="/books"
-        schema={bookSchema}
-        fields={bookFields}
-        onSaved={() => {
+        onCreated={() => {
           setCreating(false);
           refresh();
         }}
       />
-
-      {/* Edit */}
-      {editing && (
-        <CRUDmodal
-          open={!!editing}
-          onClose={() => setEditing(null)}
-          title="Редактировать книгу"
-          endpoint="/books"
-          schema={bookSchema}
-          fields={bookFields}
-          initialData={editing ? cleanBook(editing) : undefined}
-          onSaved={onBookSaved}
-        />
-      )}
-
-      {/* Delete */}
-      {deleting && (
-        <CRUDmodal
-          open={!!deleting}
-          onClose={() => setDeleting(null)}
-          title="Удалить книгу"
-          endpoint="/books"
-          schema={bookSchema}
-          fields={bookFields}
-          initialData={deleting ? cleanBook(deleting) : undefined}
-          mode="delete"
-          onDeleted={onBookDeleted}
-        />
-      )}
 
       {/* ---------- справочник ---------- */}
       <ReferenceManagerModal

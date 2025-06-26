@@ -12,7 +12,7 @@ const Header: React.FC = () => {
 
   const [refOpen, setRefOpen] = useState(false);
   const [listsOpen, setListsOpen] = useState(false);
-  const [borrowOpen, setBorrowOpen] = useState(false); // Added state for BorrowModal
+  const [borrowOpen, setBorrowOpen] = useState(false);
 
   /* Закрываем дропдаун кликом вне его */
   const listsRef = useRef<HTMLDivElement>(null);
@@ -85,9 +85,6 @@ const Header: React.FC = () => {
               </button>
               <button onClick={() => navigate('/reports')} className="hover:underline">
                 Отчёты
-              </button>
-              <button onClick={() => navigate('/import-export')} className="hover:underline">
-                Импорт/Экспорт
               </button>
               <button onClick={() => setRefOpen(true)} className="hover:underline">
                 Справочники

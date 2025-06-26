@@ -6,8 +6,9 @@ import BaseDialog from '../BaseDialog.tsx';
 
 import AddPersonDialog from './Dialogs/AddPersonDialog.tsx';
 import IssueCopyDialog from './Dialogs/IssueCopyDialog.tsx';
+import PrintBorrowSlip from '../../utils/print/PrintBorrowSlip.tsx';
+import { Person } from '../../utils/interfaces.tsx';
 
-/* ─────────── типы ─────────── */
 export interface IssuedCopy {
   id: number | string;
   bookTitle: string;
@@ -54,30 +55,34 @@ interface BorrowModalProps {
 }
 
 const BorrowModal: React.FC<BorrowModalProps> = ({ open, onClose, onDone }) => {
-  const [personId, setPersonId] = useState<number | null>(null);
-  const [personName, setPersonName] = useState('');
+  /* выбранный читатель */
+  const [person, setPerson] = useState<Person | null>(null);
+  const [personName, setPersonName] = useState(''); // для поля ввода
 
+  /* книги */
   const [issued, setIssued] = useState<IssuedCopy[]>([]);
   const [drafts, setDrafts] = useState<IssuedCopy[]>([]);
 
+  /* ui-состояния */
   const [saving, setSaving] = useState(false);
   const [pDlg, setPDlg] = useState(false);
   const [iDlg, setIDlg] = useState(false);
 
-  /* ─── обновление активных при каждом открытии ─── */
+  /* ─── подтягиваем активные книги при каждом открытии и смене читателя ─── */
   useEffect(() => {
-    if (!open || !personId) return;
+    if (!open || !person?.id) return;
     (async () => {
       try {
-        setIssued(await fetchActive(personId));
+        setIssued(await fetchActive(person.id));
       } catch {
         toast.error('Не удалось загрузить активные выдачи');
       }
     })();
-  }, [open, personId]);
+  }, [open, person?.id]);
 
-  const handlePersonPick = (p: any) => {
-    setPersonId(p.id);
+  /* ─── выбор читателя ─── */
+  const handlePersonPick = (p: Person) => {
+    setPerson(p);
     setPersonName(
       `${p.lastName} ${p.firstName}${p.patronymic ? ` ${p.patronymic}` : ''}`,
     );
@@ -85,20 +90,19 @@ const BorrowModal: React.FC<BorrowModalProps> = ({ open, onClose, onDone }) => {
     (async () => setIssued(await fetchActive(p.id)))();
   };
 
+  /* ─── добавление черновика выдачи ─── */
   const handleDraft = (d: IssuedCopy) => {
-    // Смотрим, есть ли уже такой экземпляр среди оформляемых-черновиков и активных выдач
     const isDuplicate = [...drafts, ...issued].some(
-      (x) => x.inventoryNo === d.inventoryNo, 
+      (x) => x.inventoryNo === d.inventoryNo,
     );
-
     if (isDuplicate) {
       toast.error('Такой экземпляр уже есть в списке');
       return;
     }
-
     setDrafts((prev) => [d, ...prev]);
   };
 
+  /* ─── приём возврата ─── */
   const acceptReturn = async (id: number) => {
     try {
       await httpClient.patch(`/borrow-records/${id}/return`);
@@ -109,21 +113,22 @@ const BorrowModal: React.FC<BorrowModalProps> = ({ open, onClose, onDone }) => {
     }
   };
 
+  /* ─── сохранение новых выдач ─── */
   const save = async () => {
-    if (!personId || !drafts.length) return;
+    if (!person?.id || !drafts.length) return;
     setSaving(true);
     try {
       await Promise.all(
         drafts.map((d) =>
           httpClient.post('/borrow-records', {
             bookCopyId: Number(String(d.id).replace(TMP, '')),
-            personId,
+            personId: person.id,
             dueDate: d.dueDate || undefined,
           }),
         ),
       );
       toast.success('Выдача оформлена');
-      setIssued(await fetchActive(personId));
+      setIssued(await fetchActive(person.id));
       setDrafts([]);
       onDone();
       onClose();
@@ -134,6 +139,7 @@ const BorrowModal: React.FC<BorrowModalProps> = ({ open, onClose, onDone }) => {
     }
   };
 
+  /* ─── объединённый список для таблицы ─── */
   const rows = useMemo(() => [...drafts, ...issued], [drafts, issued]);
 
   /* ─────────── UI ─────────── */
@@ -142,7 +148,12 @@ const BorrowModal: React.FC<BorrowModalProps> = ({ open, onClose, onDone }) => {
       <BaseDialog
         open={open}
         onOpenChange={(v) => !v && onClose()}
-        title="Выдача / Возврат"
+        title={
+          <div className="flex items-center justify-between">
+            <span>Выдача / Возврат</span>
+            <PrintBorrowSlip person={person} rows={rows} />
+          </div>
+        }
         widthClass="max-w-3xl"
         footer={
           <>
@@ -155,7 +166,7 @@ const BorrowModal: React.FC<BorrowModalProps> = ({ open, onClose, onDone }) => {
             </button>
             <button
               className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
-              disabled={saving || !drafts.length || !personId}
+              disabled={saving || !drafts.length || !person}
               onClick={save}
             >
               {saving ? 'Сохранение…' : 'Сохранить'}
@@ -178,7 +189,7 @@ const BorrowModal: React.FC<BorrowModalProps> = ({ open, onClose, onDone }) => {
         {/* действия */}
         <div className="flex gap-3 mb-4">
           <button
-            disabled={!personId}
+            disabled={!person}
             onClick={() => setIDlg(true)}
             className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
           >
@@ -245,6 +256,7 @@ const BorrowModal: React.FC<BorrowModalProps> = ({ open, onClose, onDone }) => {
         </div>
       </BaseDialog>
 
+      {/* модалки выбора читателя и экземпляра */}
       <AddPersonDialog
         open={pDlg}
         onClose={() => setPDlg(false)}

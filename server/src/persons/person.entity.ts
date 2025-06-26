@@ -19,4 +19,13 @@ export class Person {
 
   @Column({ name: 'birthday', type: 'date' })
   birthday: Date;
+
+  @Column({ name: 'inn', type: 'bigint', nullable: true })
+  inn?: number;
+
+  @Column({ name: 'snils', length: 14, nullable: true })
+  snils?: string;
+
+  @Column({ name: 'email', nullable: true })
+  email?: string;
 }
