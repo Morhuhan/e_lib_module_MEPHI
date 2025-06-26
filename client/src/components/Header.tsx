@@ -97,7 +97,7 @@ const Header: React.FC = () => {
           <BorrowModal
             open={borrowOpen}
             onClose={() => setBorrowOpen(false)}
-            onDone={() => setBorrowOpen(false)} // Close modal after saving
+            onDone={() => setBorrowOpen(false)}
           />
 
           {role === 'ADMIN' && (
