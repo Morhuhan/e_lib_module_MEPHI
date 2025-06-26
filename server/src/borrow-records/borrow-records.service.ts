@@ -1,3 +1,4 @@
+// borrow-records.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -12,12 +13,12 @@ export class BorrowRecordsService {
 
   /* ---------- общие SQL-выражения ---------- */
   /** активная (не возвращённая) запись */
-  private static readonly activeExpr = 'record.return_date IS NULL';
+  private static readonly activeExpr = 'record.returnDate IS NULL';
 
   /** просрочка — не возвращена и истёк due/expectedReturn */
   private static readonly overdueExpr = `
-    record.return_date IS NULL
-    AND COALESCE(record.due_date, record.expected_return_date) < CURRENT_DATE
+    record.returnDate IS NULL
+    AND COALESCE(record.dueDate, record.expectedReturnDate) < CURRENT_DATE
   `;
 
   /* ------------------------------------------------------------------ */
@@ -27,6 +28,7 @@ export class BorrowRecordsService {
     bookCopyId: number,
     personId: number,
     issuedByUserId: number,
+    dueDate: string,
   ): Promise<BorrowRecord> {
     const today = new Date();
     const expectedReturn = new Date(today);
@@ -34,9 +36,10 @@ export class BorrowRecordsService {
 
     const record = this.borrowRecordRepository.create({
       bookCopy: { id: bookCopyId } as any,
-      person:   { id: personId }   as any,
+      person: { id: personId } as any,
       issuedByUser: { id: issuedByUserId } as any,
       borrowDate: today.toISOString().split('T')[0],
+      dueDate: dueDate,
       expectedReturnDate: expectedReturn.toISOString().split('T')[0],
       returnDate: null,
     });
@@ -108,7 +111,7 @@ export class BorrowRecordsService {
     if (onlyActive) qb.andWhere(BorrowRecordsService.activeExpr);
     if (onlyDebts)  qb.andWhere(BorrowRecordsService.overdueExpr);
 
-    qb.orderBy('record.borrow_date', 'ASC').addOrderBy('record.id', 'ASC');
+    qb.orderBy('record.borrowDate', 'ASC').addOrderBy('record.id', 'ASC');
     return qb.getMany();
   }
 
@@ -137,11 +140,11 @@ export class BorrowRecordsService {
     /* ---------- поиск ---------- */
     const colMap: Record<string, string> = {
       title:              'book.title',
-      inventoryNo:        'bookCopy.inventory_no',
-      person:             "concat_ws(' ', person.last_name, person.first_name, person.patronymic)",
-      borrowDate:         'record.borrow_date::text',
-      expectedReturnDate: 'record.expected_return_date::text',
-      returnDate:         'record.return_date::text',
+      inventoryNo:        'bookCopy.inventoryNo',
+      person:             "concat_ws(' ', person.lastName, person.firstName, person.patronymic)",
+      borrowDate:         'record.borrowDate::text',
+      expectedReturnDate: 'record.expectedReturnDate::text',
+      returnDate:         'record.returnDate::text',
       issuedByUser:       'issuedByUser.username',
       acceptedByUser:     'acceptedByUser.username',
     };
@@ -154,11 +157,11 @@ export class BorrowRecordsService {
       } else {
         qb.andWhere(
           `(book.title ILIKE :s
-          OR bookCopy.inventory_no ILIKE :s
-          OR concat_ws(' ', person.last_name, person.first_name, person.patronymic) ILIKE :s
-          OR record.borrow_date::text ILIKE :s
-          OR record.expected_return_date::text ILIKE :s
-          OR record.return_date::text ILIKE :s
+          OR bookCopy.inventoryNo ILIKE :s
+          OR concat_ws(' ', person.lastName, person.firstName, person.patronymic) ILIKE :s
+          OR record.borrowDate::text ILIKE :s
+          OR record.expectedReturnDate::text ILIKE :s
+          OR record.returnDate::text ILIKE :s
           OR issuedByUser.username ILIKE :s
           OR acceptedByUser.username ILIKE :s)`,
           { s: `%${search}%` },
@@ -167,15 +170,18 @@ export class BorrowRecordsService {
     }
 
     /* ---------- сортировка ---------- */
-    const allowedSorts: Record<string, { expr: string; type: 'text' | 'date' }> = {
-      title:              { expr: 'book.title',                       type: 'text' },
-      inventoryNo:        { expr: 'bookCopy.inventory_no',            type: 'text' },
-      person:             { expr: "concat_ws(' ', person.last_name, person.first_name, person.patronymic)", type: 'text' },
-      borrowDate:         { expr: 'record.borrow_date',               type: 'date' },
-      expectedReturnDate: { expr: 'record.expected_return_date',      type: 'date' },
-      returnDate:         { expr: 'record.return_date',               type: 'date' },
-      issuedByUser:       { expr: 'issuedByUser.username',            type: 'text' },
-      acceptedByUser:     { expr: 'acceptedByUser.username',          type: 'text' },
+    const allowedSorts: Record<
+      string,
+      { expr: string; type: 'text' | 'date' }
+    > = {
+      title:              { expr: 'book.title',                                    type: 'text' },
+      inventoryNo:        { expr: 'bookCopy.inventoryNo',                          type: 'text' },
+      person:             { expr: "concat_ws(' ', person.lastName, person.firstName, person.patronymic)", type: 'text' },
+      borrowDate:         { expr: 'record.borrowDate',                             type: 'date' },
+      expectedReturnDate: { expr: 'record.expectedReturnDate',                     type: 'date' },
+      returnDate:         { expr: 'record.returnDate',                             type: 'date' },
+      issuedByUser:       { expr: 'issuedByUser.username',                         type: 'text' },
+      acceptedByUser:     { expr: 'acceptedByUser.username',                       type: 'text' },
     };
 
     if (sort) {

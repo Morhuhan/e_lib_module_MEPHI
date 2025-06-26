@@ -5,6 +5,16 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   safelist: [
+    'bg-gray-50',
+    'bg-gray-100',
+    'bg-gray-200',
+    'bg-gray-300',
+    'bg-gray-400',
+    'bg-gray-500',
+    'bg-gray-600',
+    'bg-gray-700',
+    'bg-gray-800',
+    'bg-gray-900',
     'bg-blue-50',
     'bg-blue-100',
     'bg-blue-200',
@@ -19,6 +29,18 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        gray: {
+          50: '#f9fafb',
+          100: '#e6e8eb', // Более яркий gray-100
+          200: '#d1d5db',
+          300: '#b0b7c3',
+          400: '#8b96a6',
+          500: '#6b7280',
+          600: '#4b5563',
+          700: '#374151',
+          800: '#1f2937',
+          900: '#111827',
+        },
         primary: {
           DEFAULT: "#3b82f6",
           dark: "#2563eb",

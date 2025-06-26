@@ -94,8 +94,14 @@ const Copies: React.FC = () => {
       setError(null);
       try {
         const p = new URLSearchParams();
-        if (rawSearch.trim()) p.append('search', rawSearch.trim());
-        p.append('searchColumn', searchColumn);
+
+        /* добавляем колонку ТОЛЬКО если есть поисковый текст */
+        const trimmedSearch = rawSearch.trim();
+        if (trimmedSearch) {
+          p.append('search', trimmedSearch);
+          p.append('searchColumn', searchColumn);
+        }
+
         p.append('onlyAvailable', String(onlyAvailable));
         p.append('page',  String(page));
         p.append('limit', String(limit));

@@ -15,6 +15,13 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { BorrowRecordsService } from './borrow-records.service';
 
+
+export class CreateBorrowRecordDto {
+  bookCopyId: number;
+  personId: number;
+  dueDate: string;
+}
+
 @Controller('borrow-records')
 @UseGuards(AuthGuard('jwt'))
 export class BorrowRecordsController {
@@ -22,15 +29,15 @@ export class BorrowRecordsController {
 
   @Post()
   async createBorrowRecord(
-    @Body('bookCopyId') bookCopyId: number,
-    @Body('personId') personId: number,
+    @Body() dto: CreateBorrowRecordDto,
     @Request() req: any,
   ) {
     const userId = req.user.userId;
     return this.borrowRecordsService.createBorrowRecord(
-      bookCopyId,
-      personId,
+      dto.bookCopyId,
+      dto.personId,
       userId,
+      dto.dueDate,
     );
   }
 

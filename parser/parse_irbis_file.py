@@ -246,6 +246,8 @@ def parse_irbis_file(dsn: str, infile: str, outfile: str) -> None:
 
                 # --- Книга ---
                 sql_out.write(f"\n-- --- Книга #{record_count} ---\n")
+                if not title:
+                    return
                 sql_out.write(
                     "INSERT INTO public.book("
                     "id,title,\"type\",edit,edition_statement,phys_desc,series,description) VALUES("
