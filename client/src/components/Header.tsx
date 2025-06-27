@@ -114,7 +114,7 @@ const Header: React.FC = () => {
           <div className="flex-1 flex justify-center space-x-4">
             <button onClick={() => setBorrowOpen(true)} className={menuBtn}>
               <img src={BORROW_ICON} alt="" className="w-5 h-5 shrink-0" />
-              <span>Сдать/Принять&nbsp;книгу</span>
+              <span>Выдача / Возврат</span>
             </button>
 
             <button onClick={() => setRefOpen(true)} className={menuBtn}>

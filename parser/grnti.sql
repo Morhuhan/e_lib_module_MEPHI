@@ -1,5 +1,4 @@
 -- INSERT-ы ГРНТИ, сгенерировано из grnti.xlsx
-INSERT INTO public.grnti (grnti_code, description) VALUES ('Код', 'Описание') ON CONFLICT (grnti_code) DO NOTHING;
 INSERT INTO public.grnti (grnti_code, description) VALUES ('00.00.00', 'ОБЩЕСТВЕННЫЕ НАУКИ В ЦЕЛОМ') ON CONFLICT (grnti_code) DO NOTHING;
 INSERT INTO public.grnti (grnti_code, description) VALUES ('00.08.00', 'Общественные науки и идеология') ON CONFLICT (grnti_code) DO NOTHING;
 INSERT INTO public.grnti (grnti_code, description) VALUES ('00.09.00', 'История общественных наук') ON CONFLICT (grnti_code) DO NOTHING;
